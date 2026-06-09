@@ -1,18 +1,13 @@
-# wolfe-pack — Product Design & Implementation Brief
+# wolfe-pack — Product Design
 
-> **Status:** v1 design locked · **Authored:** 2026-06-09 · **Origin:** a structured "grill-me" design interview.
-> **Audience:** the implementation-planning agent (and humans). This document is **self-contained** — it assumes no access to the conversation that produced it.
+> **Status:** v1 design locked · 2026-06-09
+> **Audience:** contributors and the curious. This document is **self-contained**.
 
 ---
 
-## 0. How to use this document
+## 0. How to read this document
 
-You are (likely) an agent asked to plan and/or build wolfe-pack. Read this whole file first.
-
-- **The design below is LOCKED.** Each decision records its *rationale* and the *alternatives we rejected* so you understand the "why" and don't accidentally undo a deliberate choice. Do not re-litigate locked decisions; if you believe one is wrong, flag it explicitly with new evidence rather than silently changing course.
-- **§9 lists what is genuinely still open.** That is where your judgment is wanted.
-- **You have read access to the Shipyard monorepo**, which contains the *internal, production* version of this idea that wolfe-pack generalizes. Study the files referenced in §2 and §8 — they are the proven patterns to port. Shipyard lives at `~/dev/yard`; the relevant work is on branch **`jforsythe/meet-the-bots`**. All Shipyard paths in this doc are relative to that repo root.
-- **Your job is to produce an implementation plan**, not to start coding blind. Decompose the architecture in §4 into milestones (a suggested sequencing is in §10), identify the real engineering risks (§7, §9), and propose a build order.
+This is the locked v1 design. Each decision records its *rationale* and the *alternatives we rejected* so you understand the "why" and don't accidentally undo a deliberate choice. Do not re-litigate locked decisions; if you believe one is wrong, flag it explicitly with new evidence rather than silently changing course. **§8 lists what is genuinely still open** — that is where judgment is wanted. Treat §1–§7 as settled.
 
 ---
 
@@ -26,39 +21,25 @@ The name: **Winston Wolfe** ("the Wolf," the *fixer* from *Pulp Fiction*) → a 
 
 ## 2. Provenance — what this generalizes from
 
-wolfe-pack is the generalization of an internal, production bot crew running in the **Shipyard** monorepo (SenSource). That crew is the proof that this works; wolfe-pack's job is to strip the Shipyard-specific tuning and make the *architecture* portable to any repo.
-
-### The internal crew (study these)
-
-Seven autonomous bots, each a Claude Code skill at `.claude/skills/<name>/SKILL.md`, invoked on a schedule by GitHub Actions:
-
-| Internal bot | Persona logic | Category it owns | wolfe-pack equivalent |
-|---|---|---|---|
-| `orkin-man` | pest control | runtime/logic **bugs**, races, data-integrity | **bugs** bot |
-| `dave-ramsey` | pay down debt | **tech debt**, duplication, dead code, shallow modules | **tech-debt** bot |
-| `erin-brockovich` | finds what's uncovered | **test gaps** | **test-gaps** bot |
-| `paul-walker` | speed | **performance** (hot paths, N+1, queries, bundle) | **perf** bot |
-| `attenborough` | narrator/documentarian | **documentation** drift + freshness steward | **docs / self-healing** bot |
-| `james-madison` | constitution | **ADR / architecture-decision** lifecycle | **arch** bot |
-| `winston-wolfe` | the fixer | drains the `for-bot` issue queue → PR → green | **the fixer** (namesake) |
+wolfe-pack is the generalization of an internal, production bot crew that has run autonomously for some time in a large private monorepo — battle-tested there before any of this was designed. That crew is the proof that this works; wolfe-pack's job is to strip the codebase-specific tuning and make the *architecture* portable to any repo.
 
 ### The generalizable kernel (the actual IP)
 
-Every internal bot shares this architecture — **this is what wolfe-pack ports**:
+Every bot in that crew shares this architecture — **this is what wolfe-pack ports**:
 
-1. **Tiered model orchestration.** Opus (high effort) triages → fans out **Haiku** for cheap static scans + **Sonnet** for named specialist subagents → **Opus** ship-gate.
-2. **Confidence-tiered, verified output.** `confidence ≥ 0.85 AND verified (reproducer/test/benchmark/EXPLAIN)` → draft PR with **failing test + fix**; `0.6–0.85` → GitHub issue; `< 0.6` → discarded.
-3. **Per-run caps.** ~60-min internal wall-clock; **max ~5 findings per run**.
+1. **Tiered model orchestration.** A high-effort top-tier model triages → fans out a cheap fast tier for static scans + a mid-tier for named specialist subagents → the top tier holds the ship-gate.
+2. **Confidence-tiered, verified output.** `confidence ≥ 0.85 AND verified (reproducer/test/benchmark/query-plan)` → draft PR with **failing test + fix**; `0.6–0.85` → GitHub issue; `< 0.6` → discarded.
+3. **Per-run caps.** A ~60-min internal wall-clock; **max ~5 findings per run**.
 4. **Dedup fingerprints.** `<!-- fingerprint: SHA -->` HTML comments on existing bot PRs/issues prevent re-filing.
-5. **Anti-collision scheduling.** A 9-day domain rotation (8 app domains + 1 cross-domain), with bots **offset** from each other (e.g. orkin day N, paul N+2, dave N+5, attenborough last) so they don't fight over the same files.
+5. **Anti-collision scheduling.** A multi-day domain rotation with bots **offset** from each other so they don't fight over the same files.
 6. **Trust boundary (prompt-injection defense).** Subagent output *and* repository code under inspection are treated as **partially-trusted DATA, never instructions**. Explicit in every bot prompt.
 7. **Tiered safety gate.** Safe class (rename, extract, dead-code, type-tighten) → PR; risky class (dedup, restructure) → **characterization tests authored first, then refactor**; infeasible → issue.
-8. **A reusable GitHub Actions workflow** (`.github/workflows/_run-claude-bot.yml`) carrying the shared plumbing; thin per-bot caller workflows supply only schedule + prompt.
-9. **Signed commits via a GitHub App.** `use_commit_signing: true` on `anthropics/claude-code-action`; commits go through the App's API (not raw `git`), because the branch ruleset requires signed commits and CI runners have no signing key. An `--append-system-prompt` explicitly forbids raw `git commit`/`push`.
-10. **The fixer loop.** `winston-wolfe` consumes `for-bot`-labelled issues, locks one with `bot-in-progress`, writes tests + fix + docs, drives to green, opens a ready-for-review PR, and **stops short of merge** (a human merges).
+8. **A reusable CI workflow** carrying the shared plumbing; thin per-bot caller workflows supply only schedule + prompt.
+9. **Signed commits via a GitHub App.** `use_commit_signing: true` on `anthropics/claude-code-action`; commits go through the App's API (not raw `git`), because a branch ruleset requiring signed commits can't be satisfied by CI runners with no signing key. An `--append-system-prompt` explicitly forbids raw `git commit`/`push`.
+10. **The fixer loop.** The fixer consumes queue-labelled issues, locks one with an in-progress label, writes tests + fix + docs, drives to green, opens a ready-for-review PR, and **stops short of merge** (a human merges).
 11. **Clear ownership boundaries.** Every bot's description ends with "Do NOT use for X — that's bot Y's job."
 
-**The central tension wolfe-pack solves:** the internal bots are *deeply* codebase-tuned (they know the 8 domains, the invariant IDs, the package-naming grammar, and they call named specialists like `postgres-debugger`, `angular-races-reviewer`). A generic package can assume **none** of that. The entire design below is about preserving the kernel's *quality* while making *zero assumptions* about the target repo.
+**The central tension wolfe-pack solves:** the internal bots are *deeply* codebase-tuned — they know their codebase's domain layout, its invariant catalog, its package-naming grammar, and they call codebase-specific specialist subagents by name. A generic package can assume **none** of that. The entire design below is about preserving the kernel's *quality* while making *zero assumptions* about the target repo.
 
 ---
 
@@ -72,7 +53,7 @@ A **polished, genuinely-working v1** worth putting on Show HN and writing articl
 2. **Anti-rot.** The system must not decay. Generated artifacts that go stale are *worse than nothing*. Every decision is tested against "does this rot, and who keeps it fresh?" — and the **docs bot maintains the system itself** (its own index, the bot files, the reference docs).
 
 ### Non-goals (explicitly deferred — do not build in v1)
-- **Multi-runtime support** (Cursor, Codex, Aider, Gemini CLI, plain API). *(See §5.1 — this was considered and deliberately cut. The tiered-subagent orchestration is a Claude Code primitive; an agnostic version would 5–10× the surface and bet the launch on abstraction over fast-moving runtimes. wolfe-pack is **Claude-Code-native**.)*
+- **Multi-runtime support** (other agent CLIs, plain API). *(See §5, decision 1 — this was considered and deliberately cut. The tiered-subagent orchestration is a Claude Code primitive; an agnostic version would 5–10× the surface and bet the launch on abstraction over fast-moving runtimes. wolfe-pack is **Claude-Code-native**.)*
 - **Clean in-repo update mechanism** (re-running init and merging). v1 scaffolds; better update ergonomics come later.
 - **A community bot registry / marketplace.** Curated core only in v1 (see §5).
 
@@ -93,7 +74,7 @@ This is the single most important architectural idea, and it is subtle. **Get it
 
 **Why this is the safe place to put the bespoke/generated surface:** a specialist *advises* the hunt and *informs* the fix, but **the bot still applies its verification/confidence/routing gates to everything the specialist returns.** A weak forged specialist degrades *expertise* (less-expert review), but it **cannot** emit an unverified PR or slop — the bot's gates hold regardless. Forging whole bots would not have this property (a forged bot could ship weak gates); forging specialists does. This is why the two-layer split exists.
 
-**Forging mechanism:** specialists fill a **recipe template** — a known reviewer/implementer *interface* (what they must return to the bot) plus bespoke tech *content* (domain vocabulary, anti-pattern watchlist) generated via the **forge methodology** (`forge:agent-creator` — PRISM persona structure, expert vocabulary payloads, MAST failure-mode taxonomy). The user owns `github.com/jdforsythe/forge`; the `forge:*` skills are available in Claude Code.
+**Forging mechanism:** specialists fill a **recipe template** — a known reviewer/implementer *interface* (what they must return to the bot) plus bespoke tech *content* (domain vocabulary, anti-pattern watchlist) generated via the **forge methodology** (PRISM persona structure, expert vocabulary payloads, MAST failure-mode taxonomy — from the author's open-source [forge](https://github.com/jdforsythe/forge) project). The methodology ships self-contained in the package; adopters need nothing extra installed.
 
 **Exotic/unrecognized stacks:** fall back to a generic "language-X reviewer" forged from the language alone, or run the bot specialist-less (degraded but still fully gated).
 
@@ -108,9 +89,9 @@ This is the single most important architectural idea, and it is subtle. **Get it
 
 ### 4.2 The index — the anti-rot spine
 
-A single **bot-owned sibling file** holds the machine-maintained structural index. (Concretely: in a single-package repo — the common case — this is **one file at the repo root**. See §9 for the exact filename, still open.)
+A single **bot-owned sibling file** holds the machine-maintained structural index: **`WOLFE.md` at the repo root**.
 
-- **It is co-located and forms a shallow tree.** Target repos are overwhelmingly 1–5 packages (usually 1), so the "tree" is almost always a single node. For the rare multi-package monorepo it degrades to one index per package with the root linking down.
+- **It is co-located and forms a shallow tree.** Target repos are overwhelmingly 1–5 packages (usually 1), so the "tree" is almost always a single node. For the rare multi-package monorepo it degrades to one index per package with the root linking down (deferred; see §8).
 - **`CLAUDE.md` carries only a one-line pointer to it.** The index loads **on demand** (only when a bot needs it), so it never taxes normal coding sessions — preserving the progressive-disclosure / token-economy goal. The big map is never auto-loaded.
 - **It is the bot's only hardcoded link.** A bot file hardcodes exactly one link: the index. **Strict hub-and-spoke, never mesh** — bots → index → progressive-disclosure leaves. Nothing else cross-links. (This is the core anti-rot rule: it bounds the rot surface to one file.)
 - **It binds to slow-moving abstractions — globs, area names, commands — not exact paths or line numbers.** A rename must not rot the index.
@@ -143,7 +124,7 @@ articles/demo run at level 2–3; default protects strangers' repos
 
 **Default auto-fix line** (per-class, overridable in `init --deep`):
 - **Auto-fixable (fast route):** bugs (with a failing reproducer) · docs · test-gaps · a11y · i18n. *(Fix is proven by a passing test; low blast radius.)*
-- **File-issue-only (reviewed route):** security · perf · tech-debt/refactor · architecture. *(Blast radius / human judgment / trade-off. A wrong security "fix" is the worst possible first impression — humans gate it. Override available in `--deep`.)*
+- **File-issue-only (reviewed route):** security · perf · tech-debt/refactor · architecture · infrastructure. *(Blast radius / human judgment / trade-off. A wrong security "fix" is the worst possible first impression — humans gate it. Override available in `--deep`, except security, which is never overridable.)*
 
 ### 4.4 Execution backends — ramped
 
@@ -160,7 +141,7 @@ Friction scales with autonomy: report/issues-only → `GITHUB_TOKEN`, zero extra
 
 **Cadence:** hunters run **weekly** by default (small repos don't churn daily) + optional **on-PR** diff scan; the **fixer is label-triggered** (`on: issues: types: [labeled]`, fires when a human adds `wolfe:queued`) **+ a daily safety-net cron**. All configurable. *(The internal crew's bihourly poll is overkill at OSS-repo scale.)*
 
-*(Adjacent, NOT banked for v1: Claude-native scheduled cloud "routines" via the `schedule` skill could be a third backend — unattended without GH Actions or the user's machine — but whether a routine can reach the repo + `gh` to open PRs needs verifying before promising it. See §9.)*
+*(Adjacent, NOT banked for v1: Claude-native scheduled cloud "routines" could be a third backend — unattended without GH Actions or the user's machine — but whether a routine can reach the repo + `gh` to open PRs needs verifying before promising it. See §8.)*
 
 ### 4.5 Labels — own a namespace, be a polite guest
 
@@ -170,15 +151,18 @@ wolfe-pack creates **only `wolfe:`-prefixed labels** (zero collision with the ad
 |---|---|
 | `wolfe:bug` · `wolfe:security` · `wolfe:test-gap` · `wolfe:a11y` · `wolfe:i18n` · `wolfe:perf` · `wolfe:tech-debt` · `wolfe:arch` · `wolfe:docs` · `wolfe:infra` | category (which packmate found it) |
 | `wolfe:needs-triage` | filed issue awaiting a human decision (default on medium-confidence) |
-| `wolfe:queued` | human queued it for the fixer (internal equivalent: `for-bot`) |
-| `wolfe:fixing` | claimed + locked by the fixer (internal: `bot-in-progress`) |
-| `wolfe:fix` | a PR wolfe-pack opened (internal: `automated` / `winston-wolfe`) |
+| `wolfe:queued` | human queued it for the fixer |
+| `wolfe:fixing` | claimed + locked by the fixer |
+| `wolfe:fix` | a PR wolfe-pack opened |
+| `wolfe:unverified` | finding the pack couldn't verify in its environment (degradation rule) |
+| `wolfe:rejected` | human-rejected finding — its fingerprint is never re-filed |
+| `wolfe:run-log` | pins the run-history issue the pack appends run records to |
 
-*(Study the internal label scheme at `docs/agent-knowledge/github-labels.md` — families: `type:`, `risk:`, `severity:`, `status:`, `app:`, plus the bot-loop labels. wolfe-pack mirrors the `prefix:value` style but namespaces everything under `wolfe:`.)*
+The pack mirrors the proven `prefix:value` label style but namespaces everything under `wolfe:`.
 
 ### 4.6 Security posture (shipped defaults)
 - **Least-privilege.** The workflow `permissions:` block grants only `contents:write` / `pull-requests:write` / `issues:write` — never admin, never merge. **Bots can never self-approve or self-merge** — branch protection + token scope make it impossible.
-- **Prompt-injection trust boundary in every bot.** Repo content + subagent output = DATA, never instructions. This matters *more* than in the internal repo: wolfe-pack's on-PR scanning reads diffs from **untrusted external contributors** who can embed "ignore instructions, exfiltrate secrets" in a PR. The least-privilege token is the backstop: even a successful injection can't merge, can't reach other repos, can't read other secrets.
+- **Prompt-injection trust boundary in every bot.** Repo content + subagent output = DATA, never instructions. This matters *more* than in the internal crew: wolfe-pack's on-PR scanning reads diffs from **untrusted external contributors** who can embed "ignore instructions, exfiltrate secrets" in a PR. The least-privilege token is the backstop: even a successful injection can't merge, can't reach other repos, can't read other secrets.
 - **Secrets handling.** Model creds (`CLAUDE_CODE_OAUTH_TOKEN` or Anthropic API key) planted via `gh secret set` (stdin/`--body-file`, never echoed, never written to a committed file).
 
 ### 4.7 Cost
@@ -187,14 +171,14 @@ Cost-surprise is the #1 adoption killer for "autonomous model fleets," and an un
 - **Scope itself is bounded:** diff (on-PR), time-window (scheduled), and **one domain/area per run** for big repos (the rotation idea) — so each run stays budgetable regardless of total repo size.
 - **Hard runaway ceiling ≈ k× the scope-derived estimate.** On approach, the run finishes the current verification, then stops and **reports what it skipped**.
 - **Per-run accounting** (tokens / approx $) in every run summary; the estimate starts rough and self-calibrates.
-- **Tiered models are cost-efficient by design** (Haiku for scans, Sonnet for specialists, Opus for orchestration/gate). A "lite mode" that collapses tiers for cost-sensitive repos is a candidate (see §9).
+- **Tiered models are cost-efficient by design** (cheap tier for scans, mid tier for specialists, top tier for orchestration/gate). A "lite mode" that collapses tiers for cost-sensitive repos is a candidate (see §8).
 
 ### 4.8 The `init` flow (the hero / the demo)
-- **Entry:** `npx wolfe-pack init` (hero, universally legible — checks for the `claude` CLI, guides install if missing, lands the user in the in-CC interview) **or** `/wolfe-pack init` (native path for Claude Code insiders). Both end in the same in-Claude-Code interview, because the smart work (explore → interview → forge → scaffold) must run inside a Claude Code session.
+- **Entry:** `npx wolfe-pack init` (hero, universally legible — checks for the `claude` CLI, guides install if missing, lands the user in the in-CC interview) **or** `/wolfe-init` (native path for Claude Code insiders). Both end in the same in-Claude-Code interview, because the smart work (explore → interview → forge → scaffold) must run inside a Claude Code session.
 - **Interaction:** **light by default** — explore aggressively, *infer* stack/roster/paths, ask only the handful of questions detection genuinely can't answer, then present a **reviewable plan → apply**. **`init --deep`** = the full relentless interview for power users (per-class fix-vs-file toggles, etc.).
 - **Review-before-write is table stakes:** init never silently writes files/workflows/secrets — it proposes, the user approves.
 - **Roster is detection-driven** (see §4.1/§3): always-on core = bugs/security/docs-self-healing; conditional bots *offered* when their surface is detected but the **full catalog is always opt-in-able** (you can add the infra or a11y bot before you have IaC or a frontend — bots **no-op gracefully** when their surface is absent).
-- **Doc-backfill = minimal, code-derived, bot-owned.** init writes the index (always, code-derived) + reference leaves only where the code supports them (e.g. `testing.md` from the detected test setup, area notes from real package structure). It **does not invent domain prose**; unknowns become a clearly-marked `TODO:` stub or a question, never a confident guess. The self-healing bot owns it all thereafter so it can't rot. `CONTEXT.md`/ADR scaffolding is offered only in `--deep`, never pushed.
+- **Doc-backfill = minimal, code-derived, bot-owned.** init writes the index (always, code-derived) + reference leaves only where the code supports them (e.g. a freshness ledger from the detected docs, area notes from real package structure). It **does not invent domain prose**; unknowns become a clearly-marked `TODO:` stub or a question, never a confident guess. The self-healing bot owns it all thereafter so it can't rot. `CONTEXT.md`/ADR scaffolding is offered only in `--deep`, never pushed.
 - init also: detects + reconciles existing agents (§4.1), and **offers branch-protection setup** — detects current protection, recommends "require PR + ≥1 review + CI green before merge," and **offers to apply via `gh api`** showing exactly what it'll set (never silent). Framed honestly: "wolfe-pack opens PRs; these rules guarantee a bot PR can't merge without your CI passing and a human approving."
 
 ---
@@ -208,7 +192,7 @@ Every locked decision, with the rejected alternative and the one-line "why." Det
 | 1 | Substrate | **Claude-Code-native** | runtime-agnostic; "agnostic v1, portable later" | tiered subagent orchestration is a CC primitive; agnostic 5–10×'s surface & bets launch on abstraction. *(Reversed twice in design; final = native.)* |
 | 2 | Footprint | **Everything scaffolded in-repo, user owns it** | plugin owns bots; split | simplest to make work (no plugin-in-CI), most transparent, best `git diff` demo. Update ergonomics deferred. |
 | 3 | Fixed-vs-forged | **Generic bots + per-repo specialization centralized in an index** | baked scattered refs; static-generic-only | scattered baked refs rot; one index = one thing to maintain. |
-| 4 | Index home | **Bot-owned sibling file; 1-line pointer in `CLAUDE.md`; on-demand** | overload `CLAUDE.md`; reuse `CONTEXT.md` | avoids auto-load tax + human/machine collision + `CONTEXT.md`'s domain-only charter. |
+| 4 | Index home | **Bot-owned sibling file (`WOLFE.md`); 1-line pointer in `CLAUDE.md`; on-demand** | overload `CLAUDE.md`; reuse `CONTEXT.md` | avoids auto-load tax + human/machine collision + `CONTEXT.md`'s domain-only charter. |
 | 5 | Index linking | **Strict hub-and-spoke; bind to globs/commands not paths** | mesh of cross-links; exact paths | bounds rot surface to one file; survives renames. |
 | 6 | Roster | **Detection-driven defaults; full catalog opt-in-able; graceful no-op** | ship-everything-enabled; minimal-core-only | honest (no a11y bot on a CLI), cost scales with repo, each bot hardened. |
 | 7 | Two layers | **Bots fixed/known; specialists forged** | forge whole bots; ship all specialists | forging specialists is slop-safe (gated by the bot); forging bots isn't; can't pre-ship every stack. |
@@ -241,72 +225,37 @@ Every locked decision, with the rejected alternative and the one-line "why." Det
 
 ---
 
-## 7. Non-obvious technical facts the implementer MUST internalize
+## 7. Non-obvious technical facts to internalize
 
 1. **`GITHUB_TOKEN`-authored PRs don't trigger CI** → they can't satisfy "require CI green" → the safety rail and the fixer loop both break. This is *why* the local rung (real user identity) and the Actions rung (user's own App) exist. (§4.4)
-2. **Verification needs a runnable repo.** Getting an arbitrary repo to install + test + reproduce inside a CI runner (or even locally) is the real engineering risk behind the always-on gate. The degradation rule (→ issue) is the safety net, but the *happy path* (bring-up) is non-trivial and stack-specific. Study how the internal `_run-claude-bot.yml` does pnpm install / verify. (§9)
+2. **Verification needs a runnable repo.** Getting an arbitrary repo to install + test + reproduce inside a CI runner (or even locally) is the real engineering risk behind the always-on gate. The degradation rule (→ issue) is the safety net; the happy path (environment bring-up) is non-trivial and stack-specific. (§8)
 3. **Progressive disclosure controls context, not files.** A big `.claude/skills/` tree does *not* bloat context — skills load on demand. The index is the thing that must stay off the auto-load path (hence the sibling + 1-line pointer). (§4.2)
-4. **Signed commits in CI need the App's API path**, not raw `git` (runners have no signing key). Mirror the internal `use_commit_signing: true` + the `--append-system-prompt` that forbids raw `git commit`/`push`. (§2)
+4. **Signed commits in CI need the App's API path**, not raw `git` (runners have no signing key). Use `use_commit_signing: true` plus an `--append-system-prompt` that forbids raw `git commit`/`push`. (§2)
 5. **The forged layer is slop-safe only because the bot gates everything it returns.** Never let a specialist open a PR or skip verification on its own. (§4.1)
 
 ---
 
-## 8. Proven patterns to port (read these in Shipyard, branch `jforsythe/meet-the-bots`)
+## 8. Open / deferred — and where v1 landed
 
-- `.claude/skills/orkin-man/SKILL.md` — the canonical bug-hunter; the clearest example of tiered orchestration + confidence gates + caps + trust boundary. **Start here.**
-- `.claude/skills/winston-wolfe/SKILL.md` — the fixer loop (queue → claim → fix → green → stop-short-of-merge).
-- `.claude/skills/attenborough/SKILL.md` — the documentation/self-healing steward (the model for wolfe-pack's docs bot + the freshness machinery).
-- `.claude/skills/{dave-ramsey,erin-brockovich,paul-walker,james-madison}/SKILL.md` — tech-debt, test-gaps, perf, arch/ADR. Note the per-bot safety gates and the "Do NOT use for X" ownership boundaries.
-- `.github/workflows/_run-claude-bot.yml` — **the reusable workflow to generalize.** Checkout, pnpm/node, cache, install, `anthropics/claude-code-action` with `use_commit_signing: true`, session-log artifact, dry-run artifact. Thin per-bot callers supply schedule + prompt.
-- `.github/workflows/nightly-orkin-man.yml` — a reference caller: workflow_dispatch inputs, the trust-boundary preamble, the post-PR `/ss-fix` follow-up, the run-summary contract.
-- `.github/workflows/bihourly-winston-wolfe.yml` — the fixer's scheduled caller.
-- `docs/agent-knowledge/github-labels.md` — the label scheme to mirror (namespaced).
-- `forge:agent-creator` / `forge:skill-creator` skills (and `github.com/jdforsythe/forge`) — the specialist-forging methodology (PRISM / vocabulary payloads / MAST).
+The genuinely-unresolved list from the design phase, updated with each item's v1 disposition. Deferred work gets surfaced, not buried — `docs/deferred.md` tracks these operationally.
 
-**What to strip when porting:** the 8 hardcoded domain names + 9-day rotation (replace with detection-driven scope + scope-relative budgets), the named codebase-specific specialists (replace with forged-from-stack specialists), invariant-ID references, `@sensource` package grammar, `pnpm`/Turbo assumptions (detect the package manager + verify command), and signed-commit-is-mandatory assumptions (detect whether the repo requires it).
-
----
-
-## 9. Open / deferred (genuinely unresolved — your judgment wanted)
-
-1. **Exact index filename** now that the product is named. Candidates: `WOLFE.md` (visible, root, readable — preferred for the "all prompts readable" demo value) vs `.wolfe/map.md` (namespaced dir) vs other. Decision was deferred to naming; a **visible, root-level, readable** file was favored over a hidden dotfile.
-2. **Verification environment bring-up** for arbitrary repos in Actions (install deps, stand up services/datastores). The biggest engineering risk. Degradation rule exists; the happy path does not yet. Needs a design.
-3. **Multi-package index-tree mechanics** for the rare monorepo (per-package sibling + root linking down). Sketched, not specified. Power-user case.
-4. **Model-tier defaults + a "lite mode"** (collapse tiers / cheaper models for cost-sensitive repos). Sketched, not specified.
-5. **Claude-native scheduled cloud routines** as a third execution backend — verify whether a routine can reach the repo + `gh` to open PRs before promising it.
-6. **In-repo scaffold update path** (re-run init, diff/merge new bot/specialist versions). Deliberately deferred ("rework later").
-7. **Cost calibration constants** — the estimate is rough until real-run data exists. Need a way to seed reasonable defaults.
-8. **The recipe-template format** for both bots (the fixed skeleton) and specialists — implementation detail, but it's the heart of the system; design it carefully and early.
-
-*(These are real follow-ups. When you build, track each one explicitly — do not silently drop scope. Per the author's working style, deferred work gets surfaced, not buried.)*
+1. **Exact index filename.** ✅ **Resolved: `WOLFE.md`** — visible, root-level, readable (favored over a hidden dotfile for the "all prompts readable" demo value). Machine data lives in `.wolfe/`.
+2. **Verification environment bring-up** for arbitrary repos. **v1 line shipped:** init runs a real trial (install → build → test), records commands/timeouts/tier and evidence-backed blockers in the index; bots consult the tier and degrade unverifiable findings to `[unverified]` issues. Service/datastore bring-up in CI remains open (users own the workflow and can add `services:` themselves).
+3. **Multi-package index-tree mechanics** for the rare monorepo. **Still open** — v1 uses one `WOLFE.md` with multiple areas; the schema reserves an `index:` field per area for per-package indexes later.
+4. **Model-tier defaults + a "lite mode."** Tier defaults shipped (cheap scans / mid-tier specialists / top-tier gates); **lite mode still open**, pending real cost data from run histories.
+5. **Claude-native scheduled cloud routines** as a third execution backend. **Still open** — verify a routine can reach the repo + `gh` to open PRs before promising it.
+6. **In-repo scaffold update path** (re-run init, diff/merge new bot versions). **Still deferred** — re-runs get a scoped reconcile mode (roster/specialists/labels), not an updater. Bot files being verbatim + checksummed makes a future updater's diffing clean.
+7. **Cost calibration constants.** Rough seeds ship, labeled as seeds; the docs steward recalibrates from real run history and flips the `seeded` flag after ≥3 real runs per bot.
+8. **The recipe-template format.** ✅ **Resolved:** fully-static bot files assembled from a single-source kernel (gates/phases/schemas authored once), plus a specialist recipe with byte-identical interface sections and forged content slots.
 
 ---
 
-## 10. Suggested implementation sequencing (a starting point, not a mandate)
+## 9. References
 
-A possible build order that front-loads the demo and de-risks the hard parts:
-
-1. **The recipe-template format + one bot end-to-end, locally.** Port `orkin-man` → a generic `bugs` bot that reads an index, runs the verify command, gates findings, and opens a draft PR — driven by `wolfe-pack run` against a sample repo. This proves the kernel works generically and is the demo spine. *(Tackle §9.2 verification bring-up here — it's the gating risk.)*
-2. **The index + detection + `init` (light path).** Explore → infer stack → write the index (code-derived backfill) → scaffold the one bot → reviewable plan. This is the hero flow.
-3. **Specialist forging + reconciliation.** Add the forged-specialist layer + `forge:agent-creator` integration + existing-agent reconciliation + the registry/provenance in the index.
-4. **The rest of the core roster** (security, docs/self-healing) + the self-healing/anti-rot loop (the docs bot maintaining index + bot files + specialist roster). The self-healing loop is what makes the anti-rot pillar real — don't skip it.
-5. **The fixer + labels + the issue→queue→PR loop** (label-triggered).
-6. **The Actions backend** — the reusable workflow, the user's-own-App manifest flow, secret setup, branch-protection offer. *(Everything before this works locally with zero creds; this is the unattended upgrade.)*
-7. **Cost machinery** (scope-relative estimate + cap + accounting) — weave in as runs become real.
-8. **Conditional bots** (test-gaps, a11y, i18n, perf, tech-debt, arch, infra) — each behind detection, each hardened before it ships.
-9. **Polish + the launch artifacts** (README, the article, the 60-second demo, the contribution recipe template + quality bar).
-
-Throughout: **lean toward thoroughness on the verification gate and the anti-rot loop** — those two are the product. Everything else is in service of them.
-
----
-
-## 11. References
-
-- **Shipyard monorepo** (the internal source-of-truth this generalizes): `~/dev/yard`, branch `jforsythe/meet-the-bots`. See §8 for specific files.
-- **forge** (specialist-forging methodology): `github.com/jdforsythe/forge`; `forge:agent-creator`, `forge:skill-creator` skills in Claude Code.
-- **Claude Code** primitives used: skills (`SKILL.md`), subagents (`.claude/agents/*.md`), `anthropics/claude-code-action`, `/loop` and `schedule` skills, `CLAUDE_CODE_OAUTH_TOKEN`.
+- **forge** (specialist-forging methodology): [github.com/jdforsythe/forge](https://github.com/jdforsythe/forge). The methodology ships self-contained in this package.
+- **Claude Code** primitives used: skills (`SKILL.md`), subagents (`.claude/agents/*.md`), `anthropics/claude-code-action`, `/loop`, `CLAUDE_CODE_OAUTH_TOKEN`.
 - **Naming:** Winston Wolfe (the fixer, *Pulp Fiction*) → wolfe-pack.
 
 ---
 
-*End of brief. This document is the complete locked design as of 2026-06-09. Treat §1–§8 as settled, §9 as your mandate, §10 as a suggestion.*
+*End of design. Locked as of 2026-06-09. Treat §1–§7 as settled and §8 as the open list.*
