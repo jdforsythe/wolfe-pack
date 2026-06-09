@@ -1,0 +1,52 @@
+{
+  "name": "wolfe-pack",
+  "version": "0.1.0",
+  "description": "A pack of autonomous, verification-gated review-and-fix bots for your repo. Claude-Code-native. No slop.",
+  "keywords": [
+    "claude-code",
+    "code-review",
+    "autonomous-agents",
+    "bots",
+    "code-quality",
+    "github-actions"
+  ],
+  "homepage": "https://github.com/jdforsythe/wolfe-pack#readme",
+  "bugs": "https://github.com/jdforsythe/wolfe-pack/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdforsythe/wolfe-pack.git"
+  },
+  "license": "MIT",
+  "author": "jdforsythe",
+  "type": "module",
+  "bin": {
+    "wolfe-pack": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "assemble": "node scripts/assemble-bots.mjs",
+    "assemble:check": "node scripts/assemble-bots.mjs --check",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "verify": "npm run typecheck && npm run build && npm run assemble:check && npm run test",
+    "prepublishOnly": "npm run verify"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^0.11.0",
+    "@types/node": "^22.15.0",
+    "picocolors": "^1.1.1",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.1.0",
+    "yaml": "^2.7.0"
+  }
+}
