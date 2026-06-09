@@ -110,13 +110,13 @@ All intelligence (detection, interview, scaffolding, forging) lives in
 `templates/init/SKILL.md`. The CLI never writes into the user's repo (the
 `run` lockfile and headless logs under `.wolfe/runs/` are the one exception).
 
-## Privacy guardrail
+## Provenance hygiene
 
-wolfe-pack generalizes a private production system. `test/forbidden-strings.test.ts`
-scans every tracked file for a base64-encoded token list (so the test file
-itself stays clean) covering the private origin's names, paths, labels, and
-hosts. It runs in `npm run verify` and must stay green forever. Commit
-messages are swept manually at release time.
+wolfe-pack generalizes a private production system. Nothing in this repo —
+code, templates, docs, or commit messages — references that origin: the
+design doc describes it only anonymously, and the entire tree was swept and
+verified clean before release. Keep it that way: contributions should never
+name private systems, internal tooling, or non-public identifiers.
 
 ## Package mechanics
 
