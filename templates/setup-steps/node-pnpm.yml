@@ -1,0 +1,17 @@
+# setup-steps/node-pnpm.yml — Node.js with pnpm
+# Spliced into the stack-setup section of wolfe-run.yml by wolfe-pack init.
+# pnpm/action-setup installs pnpm; setup-node activates its built-in pnpm
+# cache — no hand-rolled actions/cache needed.
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Uses .nvmrc / .node-version / engines.node if present; falls back to LTS.
+          node-version-file: ".nvmrc"
+          node-version: "lts/*"
+          cache: "pnpm"

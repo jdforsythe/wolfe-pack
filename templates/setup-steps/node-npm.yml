@@ -1,0 +1,11 @@
+# setup-steps/node-npm.yml — Node.js with npm
+# Spliced into the stack-setup section of wolfe-run.yml by wolfe-pack init.
+# Uses setup-node's built-in npm cache; no hand-rolled actions/cache needed.
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Uses .nvmrc / .node-version / engines.node if present; falls back to LTS.
+          node-version-file: ".nvmrc"
+          node-version: "lts/*"
+          cache: "npm"

@@ -1,0 +1,20 @@
+[
+  { "name": "wolfe:bug",        "color": "D93F0B", "description": "wolfe-pack: bug finding" },
+  { "name": "wolfe:security",   "color": "B60205", "description": "wolfe-pack: security finding" },
+  { "name": "wolfe:test-gap",   "color": "0E8A16", "description": "wolfe-pack: test-gap finding" },
+  { "name": "wolfe:a11y",       "color": "1D76DB", "description": "wolfe-pack: a11y finding" },
+  { "name": "wolfe:i18n",       "color": "C5DEF5", "description": "wolfe-pack: i18n finding" },
+  { "name": "wolfe:perf",       "color": "FBCA04", "description": "wolfe-pack: perf finding" },
+  { "name": "wolfe:tech-debt",  "color": "5319E7", "description": "wolfe-pack: tech-debt finding" },
+  { "name": "wolfe:arch",       "color": "6F42C1", "description": "wolfe-pack: arch finding" },
+  { "name": "wolfe:docs",       "color": "0075CA", "description": "wolfe-pack: docs finding" },
+  { "name": "wolfe:infra",      "color": "BFD4F2", "description": "wolfe-pack: infra finding" },
+
+  { "name": "wolfe:needs-triage", "color": "E4E669", "description": "wolfe-pack finding awaiting human triage" },
+  { "name": "wolfe:queued",       "color": "7057FF", "description": "human-approved; queued for the wolfe-pack fixer" },
+  { "name": "wolfe:fixing",       "color": "1D76DB", "description": "claimed by an in-flight fixer run (lock)" },
+  { "name": "wolfe:fix",          "color": "7B61FF", "description": "PR opened by wolfe-pack" },
+  { "name": "wolfe:unverified",   "color": "EDEDED", "description": "finding could not be verified in this environment — see body" },
+  { "name": "wolfe:rejected",     "color": "000000", "description": "human-rejected: wolfe-pack will never re-file this fingerprint" },
+  { "name": "wolfe:run-log",      "color": "C0C0C0", "description": "pins the wolfe-pack run-history issue" }
+]

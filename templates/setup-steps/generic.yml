@@ -1,0 +1,22 @@
+# setup-steps/generic.yml — unrecognized / exotic stack
+# Spliced into the stack-setup section of wolfe-run.yml by wolfe-pack init.
+#
+# The stock ubuntu-latest runner already ships with:
+#   Node.js (LTS), Python 3, Ruby, Java (JDK), Go, Docker, AWS CLI, Azure CLI,
+#   git, jq, curl, wget, make, gcc, and more.
+#
+# If your stack needs additional tooling, add setup steps below this comment.
+# Examples:
+#   - name: Set up <tool>
+#     uses: <org>/<action>@<version>
+#     with:
+#       version: x.y.z
+#
+# The recorded install command (<<INSTALL_COMMAND>>) runs after this section.
+# A degraded environment (install fails) downgrades findings to [unverified]
+# issues — it never kills the run entirely.
+#
+# ── Add your setup steps here ─────────────────────────────────────────────
+# (no steps required for most generic stacks — the stock runner toolchain
+#  is sufficient)
+# ── End of setup steps ────────────────────────────────────────────────────

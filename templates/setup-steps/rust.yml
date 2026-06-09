@@ -1,0 +1,11 @@
+# setup-steps/rust.yml — Rust (stable toolchain)
+# Spliced into the stack-setup section of wolfe-run.yml by wolfe-pack init.
+# dtolnay/rust-toolchain installs the toolchain declared in rust-toolchain.toml
+# (or stable by default). Swatinem/rust-cache caches the Cargo registry and
+# build artifacts across runs.
+
+      - name: Set up Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo artifacts
+        uses: Swatinem/rust-cache@v2

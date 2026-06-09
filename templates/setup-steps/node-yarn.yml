@@ -1,0 +1,12 @@
+# setup-steps/node-yarn.yml — Node.js with Yarn (classic or Berry)
+# Spliced into the stack-setup section of wolfe-run.yml by wolfe-pack init.
+# setup-node's built-in yarn cache handles both Yarn 1 and Yarn Berry (PnP/
+# node-modules linker); no hand-rolled actions/cache needed.
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Uses .nvmrc / .node-version / engines.node if present; falls back to LTS.
+          node-version-file: ".nvmrc"
+          node-version: "lts/*"
+          cache: "yarn"

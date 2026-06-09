@@ -1,0 +1,14 @@
+# setup-steps/node-bun.yml — Bun runtime
+# Spliced into the stack-setup section of wolfe-run.yml by wolfe-pack init.
+# oven-sh/setup-bun installs Bun and activates its built-in cache.
+# setup-node is still added so tooling that shells out to `node` works.
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Set up Node.js (for tooling compatibility)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"

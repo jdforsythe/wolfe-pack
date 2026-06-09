@@ -1,0 +1,11 @@
+# setup-steps/python.yml — Python with pip
+# Spliced into the stack-setup section of wolfe-run.yml by wolfe-pack init.
+# setup-python's built-in pip cache keyed on requirements hashes.
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          # Uses .python-version if present; falls back to the latest stable.
+          python-version-file: ".python-version"
+          python-version: "3.x"
+          cache: "pip"

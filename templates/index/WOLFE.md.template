@@ -1,0 +1,110 @@
+---
+wolfe-pack: 1
+generated: {{GENERATED_DATE}}
+last-verified: {{GENERATED_DATE}}
+managed-by: wolfe-docs
+---
+
+# WOLFE.md — the wolfe-pack index for this repository
+
+> Machine-maintained by the wolfe-pack docs steward (`wolfe-docs`). Humans may
+> edit anything here; the steward reconciles edits against detected reality and
+> proposes corrections as PRs — it never silently overwrites you. Bots read
+> ONLY the fenced `yaml wolfe/*` blocks; the prose is for people.
+>
+> This file binds to slow-moving things — globs, area names, commands — never
+> exact paths or line numbers. If something here looks wrong, fix it or run
+> `npx wolfe-pack doctor`.
+
+## Stack
+
+{{STACK_PROSE}}
+
+```yaml wolfe/stack
+{{STACK_YAML}}
+```
+
+## Areas
+
+{{AREAS_PROSE}}
+
+```yaml wolfe/areas
+{{AREAS_YAML}}
+```
+
+## Commands
+
+The commands the pack uses to install, verify, and test this repo. `{file}`
+and `{globs}` are the only tokens bots substitute at runtime.
+
+```yaml wolfe/commands
+{{COMMANDS_YAML}}
+```
+
+## Verification
+
+What the pack proved it can run here, and what blocks the rest. The
+verification tier decides whether findings can become PRs (tier proven by a
+real trial run) or must degrade to `[unverified]` issues. The first CI run
+proves the `actions` tier; the steward writes the result back.
+
+```yaml wolfe/verification
+{{VERIFICATION_YAML}}
+```
+
+## Scanners
+
+Static-analysis tools detected in this repo that bots may invoke during their
+scan phase, tagged by the categories they serve.
+
+```yaml wolfe/scanners
+{{SCANNERS_YAML}}
+```
+
+## Bots
+
+The roster and the autonomy dial. `autonomy`: `0` report-only · `1` + issues
+(default) · `2` + draft PRs for verified high-confidence findings · `3` + the
+fixer drains the `wolfe:queued` queue. Verification, caps, and dedup are ON at
+every level — autonomy only changes what a *verified* finding becomes.
+
+```yaml wolfe/bots
+{{BOTS_YAML}}
+```
+
+## Specialists
+
+The specialist registry — which reviewer/implementer subagents the bots fan
+out to, and who owns each file. Provenance: `forged` (wolfe-pack created it
+and the steward maintains it) · `reused` (your pre-existing agent; the steward
+only suggests) · `enhanced` (yours, upgraded with your approval; the steward
+only suggests).
+
+```yaml wolfe/specialists
+{{SPECIALISTS_YAML}}
+```
+
+## Links
+
+Where this index points outward. It links to your domain docs when they exist
+— it never duplicates them.
+
+```yaml wolfe/links
+{{LINKS_YAML}}
+```
+
+## Operations
+
+Run-log location, naming conventions, and cost calibration. Calibration
+numbers start as rough seeds; the steward recomputes them from real run
+history (the pinned `wolfe:run-log` issue) and flips `seeded: false` once it
+has ≥3 real runs per bot.
+
+```yaml wolfe/ops
+{{OPS_YAML}}
+```
+
+---
+
+*Schema reference: the docs steward's `references/index-schema.md` (in
+`.claude/skills/wolfe-docs/`) documents every field. Index schema version: 1.*

@@ -1,0 +1,3 @@
+# wolfe-pack runtime artifacts — never commit run logs or dry-run reports
+.wolfe/runs/
+.wolfe/reports/
