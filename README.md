@@ -111,26 +111,26 @@ records tokens and approximate cost.
 
 ## About the name
 
-<img src="https://raw.githubusercontent.com/jdforsythe/wolfe-pack/master/docs/winston.png" alt="Winston Wolfe — the fixer" align="right" width="280">
+<img src="https://raw.githubusercontent.com/jdforsythe/wolfe-pack/master/docs/winston.png" alt="Winston Wolfe, the fixer" align="right" width="280">
 
 > "I'm Winston Wolfe. I solve problems."
-> — Winston Wolfe, *Pulp Fiction*
+> *(Winston Wolfe, Pulp Fiction)*
 
-In *Pulp Fiction*, when two guys have a catastrophe on their hands and no idea
-what to do, somebody makes a call and **Winston Wolfe** shows up. He doesn't
-panic, doesn't moralize, doesn't make it weird — he looks at the mess, makes a
-plan, and cleans it up. Calm, fast, exact.
+In *Pulp Fiction*, Jules and Vincent have a dead body in the back seat, brains
+all over the upholstery, and maybe an hour before it gets ugly. They are losing
+it. Marsellus makes one phone call and Winston Wolfe shows up in a tuxedo at 8
+in the morning like it's the most normal thing in the world. No lecture, no
+drama. He sizes up the mess, hands out the jobs, and the problem just goes away.
 
-That's the bot the whole package is named after: `winston-wolfe` is the fixer
-— the one that takes a triaged issue and quietly turns it into a merged fix.
-The hunters find the bodies; the Wolf makes them disappear (the right way:
-with a failing test, a verified fix, and a PR a human actually merges). A
-*pack* of bots, led in spirit by the Wolf. Naturally, he stops short of
-merging — even the Wolf knows the cleanup ends when a human signs off.
+That's the bot this whole thing is named after. `winston-wolfe` is the fixer.
+The hunters find the bodies (bugs, gaps, drift, the works). The Wolf cleans them
+up the right way: a failing test, a verified fix, a PR you actually merge. He
+doesn't panic, he doesn't freelance, and he never merges his own work, because
+the job isn't finished until you sign off on it.
 
-> And yes, he's polite about it. The pack reuses your labels, never clobbers
-> your files, and asks before it writes anything — a courteous guest who
-> cleans up after himself and lets you have the final say.
+And he's unreasonably polite about the whole thing. The pack reuses your labels,
+never touches a file it doesn't own, and asks before it writes a single line.
+Pretty please.
 
 ## Requirements
 
