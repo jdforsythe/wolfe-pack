@@ -1,5 +1,9 @@
 # wolfe-pack
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jdforsythe/wolfe-pack/master/docs/hero.png" alt="wolfe-pack — Winston Wolfe and the pack of autonomous review-and-fix bots" width="100%">
+</p>
+
 > A coordinated pack of autonomous review-and-fix bots you drop into any
 > repository. Claude-Code-native. Verification-gated. **No slop.**
 
@@ -107,10 +111,15 @@ records tokens and approximate cost.
 
 ## About the name
 
+<img src="https://raw.githubusercontent.com/jdforsythe/wolfe-pack/master/docs/winston.png" alt="Winston Wolfe — the fixer" align="right" width="280">
+
+> "I'm Winston Wolfe. I solve problems."
+> — Winston Wolfe, *Pulp Fiction*
+
 In *Pulp Fiction*, when two guys have a catastrophe on their hands and no idea
 what to do, somebody makes a call and **Winston Wolfe** shows up. He doesn't
 panic, doesn't moralize, doesn't make it weird — he looks at the mess, makes a
-plan, and cleans it up. Calm, fast, exact. *The Wolf solves problems.*
+plan, and cleans it up. Calm, fast, exact.
 
 That's the bot the whole package is named after: `winston-wolfe` is the fixer
 — the one that takes a triaged issue and quietly turns it into a merged fix.
