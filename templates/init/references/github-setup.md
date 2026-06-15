@@ -64,7 +64,7 @@ Render from `<template-root>/workflows/`:
 |---|---|---|
 | `wolfe-run.yml.template` | `.github/workflows/wolfe-run.yml` | splice the stack's `setup-steps/` fragment at `<<SETUP_STEPS>>`; `<<INSTALL_COMMAND>>` from WOLFE.md; `<<DEFAULT_BRANCH>>` |
 | `wolfe-hunter.yml.template` | one `wolfe-<bot>.yml` per enabled hunter | `<<BOT>>`, `<<SINCE_DEFAULT>>` from the bot's charter, cron tokens below |
-| `wolfe-fixer.yml.template` | `wolfe-fixer.yml` | autonomy 3 only |
+| `winston-wolfe.yml.template` | `winston-wolfe.yml` | autonomy 3 only |
 | `wolfe-pr-scan.yml.template` | `wolfe-pr-scan.yml` | only if the user opted into on-PR scanning; `<<APP_SLUG>>` after App setup (placeholder + comment if not yet created) |
 
 **Cron stagger — two axes.** Canonical day/hour per bot (UTC):

@@ -46,7 +46,8 @@ const KERNEL_PHRASES = [
 ];
 
 function bots(): string[] {
-  return readdirSync(BOTS_DIR).filter((d) => d.startsWith('wolfe-'));
+  // The namesake (winston-wolfe) keeps its own dir name; every other bot is wolfe-<name>.
+  return readdirSync(BOTS_DIR).filter((d) => d.startsWith('wolfe-') || d === 'winston-wolfe');
 }
 
 describe('bot template integrity', () => {
@@ -57,7 +58,7 @@ describe('bot template integrity', () => {
         'wolfe-arch',
         'wolfe-bugs',
         'wolfe-docs',
-        'wolfe-fixer',
+        'winston-wolfe',
         'wolfe-i18n',
         'wolfe-infra',
         'wolfe-perf',
@@ -72,7 +73,7 @@ describe('bot template integrity', () => {
     describe(bot, () => {
       const skillPath = join(BOTS_DIR, bot, 'SKILL.md');
       const text = readFileSync(skillPath, 'utf8');
-      const isFixer = bot === 'wolfe-fixer';
+      const isFixer = bot === 'winston-wolfe';
 
       it('has valid frontmatter and provenance marker', () => {
         expect(text.startsWith('---\n')).toBe(true);

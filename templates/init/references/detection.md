@@ -105,7 +105,7 @@ One credible candidate → don't ask, surface it in the plan.
 | tech-debt | always available — enable by default |
 | arch | always (full mode only when an ADR dir exists) |
 | infra | any infra surface beyond bare CI |
-| fixer | autonomy 3 |
+| winston-wolfe (fixer) | autonomy 3 |
 
 ## Existing assets
 

@@ -15,7 +15,7 @@ on:
   workflow_call:
     inputs:
       bot-name:
-        description: "Which bot to run (e.g. wolfe-bugs, wolfe-fixer)"
+        description: "Which bot to run (e.g. wolfe-bugs, winston-wolfe)"
         type: string
         required: true
       prompt:

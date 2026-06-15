@@ -126,7 +126,8 @@ Conditional bots are enabled when their surface was detected: `test-gaps`
 (test framework present), `a11y` (UI surface), `i18n` (i18n framework or
 locale files), `perf` (always available; enable by default), `tech-debt`
 (always available; enable by default), `arch` (always; full mode only with an
-ADR dir), `infra` (infra files present). `fixer` is enabled at autonomy 3.
+ADR dir), `infra` (infra files present). `winston-wolfe` (the fixer) is
+enabled at autonomy 3.
 The plan lists every catalog bot — enabled ones with the reason, disabled
 ones with "available but off (no surface detected); enable any time" — the
 full catalog is always opt-in-able and bots no-op gracefully.
@@ -199,7 +200,7 @@ In this order:
    `references/github-setup.md`: `wolfe-run.yml` (splice the stack's
    setup-steps fragment, install command, default branch), one
    `wolfe-<bot>.yml` per enabled hunter (staggered crons per the canonical
-   table + repo-hash minute), `wolfe-fixer.yml` (autonomy 3),
+   table + repo-hash minute), `winston-wolfe.yml` (autonomy 3),
    `wolfe-pr-scan.yml` if the user opted into on-PR scanning. Substitute
    every `<<TOKEN>>`; none may survive.
 

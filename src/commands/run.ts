@@ -6,7 +6,7 @@ import { isInitialized } from '../lib/rerun.js';
 import { acquireRunLock, releaseRunLock } from '../lib/lock.js';
 import { buildRunPrompt } from '../lib/prompt-builder.js';
 import { intro, outroNeutral, error, warn, note, confirm, pc } from '../lib/ui.js';
-import { VALID_BOTS } from '../lib/bots.js';
+import { VALID_BOTS, resolveBot, skillDirFor } from '../lib/bots.js';
 
 export { VALID_BOTS };
 export type { BotName } from '../lib/bots.js';
@@ -83,19 +83,22 @@ function extractAllowedTools(cwd: string): string[] {
 }
 
 export async function runRun(opts: RunOpts): Promise<void> {
-  const { bot, area, since, dryRun, headless, yolo, timeoutMs, cwd } = opts;
+  const { bot: botArg, area, since, dryRun, headless, yolo, timeoutMs, cwd } = opts;
 
-  intro(`run ${bot}`);
-
-  // 1. Validate bot name
-  if (!(VALID_BOTS as readonly string[]).includes(bot)) {
+  // 1. Validate / resolve bot name (accepts the `fixer` alias for winston-wolfe)
+  const bot = resolveBot(botArg);
+  if (!bot) {
+    intro(`run ${botArg}`);
     error(
-      `Unknown bot: ${pc.bold(bot)}\n\n` +
-      `Valid bots: ${VALID_BOTS.join(', ')}`,
+      `Unknown bot: ${pc.bold(botArg)}\n\n` +
+      `Valid bots: ${VALID_BOTS.join(', ')}\n` +
+      `(\`fixer\` also works as an alias for \`winston-wolfe\`.)`,
     );
     process.exitCode = 1;
     return;
   }
+
+  intro(`run ${bot}`);
 
   // 2. Require initialization
   if (!isInitialized(cwd)) {
@@ -108,10 +111,11 @@ export async function runRun(opts: RunOpts): Promise<void> {
   }
 
   // 3. Check for bot skill file
-  const skillPath = join(cwd, '.claude', 'skills', `wolfe-${bot}`, 'SKILL.md');
+  const skillDir = skillDirFor(bot);
+  const skillPath = join(cwd, '.claude', 'skills', skillDir, 'SKILL.md');
   if (!existsSync(skillPath)) {
     error(
-      `Skill file not found: .claude/skills/wolfe-${bot}/SKILL.md\n\n` +
+      `Skill file not found: .claude/skills/${skillDir}/SKILL.md\n\n` +
       `This bot was not installed during init. Re-run:\n` +
       `  ${pc.cyan('npx wolfe-pack init')}`,
     );

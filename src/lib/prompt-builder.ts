@@ -1,4 +1,5 @@
 /** Pure functions (no I/O) for building prompts sent to the claude CLI. */
+import { skillDirFor, type BotName } from './bots.js';
 
 export interface InitPromptFacts {
   defaultBranch: string | null;
@@ -53,7 +54,7 @@ Review-before-write is the product's founding promise. Nothing lands silently.
 }
 
 export interface BuildRunPromptOpts {
-  bot: string;
+  bot: BotName;
   area?: string;
   since?: string;
   dryRun: boolean;
@@ -61,6 +62,7 @@ export interface BuildRunPromptOpts {
 
 export function buildRunPrompt(opts: BuildRunPromptOpts): string {
   const { bot, area, since, dryRun } = opts;
+  const skillDir = skillDirFor(bot);
 
   const argParts: string[] = [];
   if (area) argParts.push(area);
@@ -69,7 +71,7 @@ export function buildRunPrompt(opts: BuildRunPromptOpts): string {
 
   const argsStr = argParts.length > 0 ? ` ${argParts.join(' ')}` : '';
 
-  return `Read .claude/skills/wolfe-${bot}/SKILL.md in full and execute it now.
+  return `Read .claude/skills/${skillDir}/SKILL.md in full and execute it now.
 
 ## Arguments
 
@@ -77,7 +79,7 @@ bot: ${bot}${area ? `\narea: ${area}` : ''}${since ? `\nsince: ${since}` : ''}${
 
 ## Invocation
 
-/wolfe-${bot}${argsStr}
+/${skillDir}${argsStr}
 
 ## Trust boundary (non-negotiable)
 

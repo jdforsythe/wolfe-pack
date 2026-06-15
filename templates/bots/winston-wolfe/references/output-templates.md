@@ -1,4 +1,4 @@
-# wolfe-fixer — output templates
+# winston-wolfe — output templates
 
 Every artifact uses one of these shapes verbatim (fill the angle-bracket slots).
 Uniform output is what makes one-glance human triage and merge possible. The
@@ -17,7 +17,7 @@ fixer PRs carry no `<!-- fingerprint: -->` comment, because their dedup is the
 ## Claim comment (posted the instant you take the lock, Phase 3)
 
 ```markdown
-🔧 **wolfe-fixer is on this.** Claimed as part of unit `<slug>`.
+🔧 **winston-wolfe is on this.** Claimed as part of unit `<slug>`.
 
 - **Unit:** <#N> (or "#N, #M, #P — <one-sentence seam>")
 - **Branch:** `wolfe/fixer/<YYYY-MM-DD>-<slug>`
@@ -28,7 +28,7 @@ If this issue should NOT be worked, remove `wolfe:queued` or close it with
 `wolfe:rejected` and I will release the claim on my next run.
 
 <!-- wolfe-claim: issue=<N> branch=wolfe/fixer/<YYYY-MM-DD>-<slug> -->
-<!-- wolfe-run: bot=fixer date=<YYYY-MM-DD> unit=<slug> -->
+<!-- wolfe-run: bot=winston-wolfe date=<YYYY-MM-DD> unit=<slug> -->
 ```
 
 The `wolfe:fixing` label is the durable lock; this comment is the human-readable
@@ -72,13 +72,13 @@ criteria.>
 
 ### Reviewer notes
 
-This PR was produced by wolfe-fixer from human-approved `wolfe:queued`
+This PR was produced by winston-wolfe from human-approved `wolfe:queued`
 issue(s) — it is ready for review, not a draft. If it is wrong or unwanted,
 closing the PR is a valid review outcome — add the `wolfe:rejected` label to the
-originating issue(s) and the pack will not re-queue them. wolfe-fixer never
+originating issue(s) and the pack will not re-queue them. winston-wolfe never
 merges; a human is the integrator.
 
-<!-- wolfe-run: bot=fixer date=<YYYY-MM-DD> unit=<slug> issues=<N,M> -->
+<!-- wolfe-run: bot=winston-wolfe date=<YYYY-MM-DD> unit=<slug> issues=<N,M> -->
 ```
 
 Labels: `wolfe:fix` plus each originating issue's own category labels (e.g.
@@ -89,7 +89,7 @@ those families exist). The PR is **ready for review (non-draft)**. Branch:
 ## Abort comment (verify red after the retry budget, Phase 6)
 
 ```markdown
-⚠️ **wolfe-fixer released this claim — could not reach green.**
+⚠️ **winston-wolfe released this claim — could not reach green.**
 
 I claimed this issue, wrote the failing-first test, and applied a fix, but the
 verify gate stayed red and I stopped rather than ship something unverified.
@@ -104,7 +104,7 @@ verify gate stayed red and I stopped rather than ship something unverified.
 A human can pick this up — or re-queue it and I will try again next run.
 
 <!-- wolfe-abort: issue=<N> reason=verify-red attempts=<n> -->
-<!-- wolfe-run: bot=fixer date=<YYYY-MM-DD> unit=<slug> -->
+<!-- wolfe-run: bot=winston-wolfe date=<YYYY-MM-DD> unit=<slug> -->
 ```
 
 When the abort is **environmental** (the gate could not honestly run — refused
@@ -122,20 +122,20 @@ a fix to work around an environment it lacks.
 ## Stale-claim release comment (Phase 0 reconciliation)
 
 ```markdown
-🧹 **wolfe-fixer released a stale claim.**
+🧹 **winston-wolfe released a stale claim.**
 
 This issue carried `wolfe:fixing` but no open `wolfe:fix` PR references it
 (`Closes #<N>`), so a previous run claimed it and did not finish. Removing
 `wolfe:fixing` and returning it to the claimable queue.
 
 <!-- wolfe-stale-release: issue=<N> -->
-<!-- wolfe-run: bot=fixer date=<YYYY-MM-DD> -->
+<!-- wolfe-run: bot=winston-wolfe date=<YYYY-MM-DD> -->
 ```
 
 ## Dry-run report (`.wolfe/reports/<date>-fixer-dryrun.md`)
 
 ```markdown
-# wolfe-fixer dry run — <date>
+# winston-wolfe dry run — <date>
 
 **Queue depth:** <n open `wolfe:queued`> · **Selected unit:** <#N | none>
 **Grouping rationale:** <one sentence naming the seam | "single issue">

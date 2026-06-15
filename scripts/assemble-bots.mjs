@@ -23,6 +23,11 @@ const outRoot = join(root, 'templates', 'bots');
 
 const INCLUDE_RE = /^<!-- @include (partials\/[a-z0-9-]+\.md) -->$/;
 
+// Bots ship at `templates/bots/wolfe-<name>/` by default. The namesake keeps
+// its own name (no `wolfe-` prefix) — that's the whole point of the joke.
+const DIR_OVERRIDES = { 'winston-wolfe': 'winston-wolfe' };
+const dirFor = (bot) => DIR_OVERRIDES[bot] ?? `wolfe-${bot}`;
+
 function assemble(sourcePath) {
   const lines = readFileSync(sourcePath, 'utf8').split('\n');
   const out = [];
@@ -51,19 +56,20 @@ if (sources.length === 0) {
 let drifted = 0;
 for (const src of sources) {
   const bot = src.replace(/\.md$/, '');
+  const dirName = dirFor(bot);
   const assembled = assemble(join(botsSrcDir, src));
-  const outDir = join(outRoot, `wolfe-${bot}`);
+  const outDir = join(outRoot, dirName);
   const outPath = join(outDir, 'SKILL.md');
   if (check) {
     const current = existsSync(outPath) ? readFileSync(outPath, 'utf8') : null;
     if (current !== assembled) {
-      console.error(`DRIFT: templates/bots/wolfe-${bot}/SKILL.md does not match kernel sources`);
+      console.error(`DRIFT: templates/bots/${dirName}/SKILL.md does not match kernel sources`);
       drifted += 1;
     }
   } else {
     mkdirSync(outDir, { recursive: true });
     writeFileSync(outPath, assembled);
-    console.log(`assembled templates/bots/wolfe-${bot}/SKILL.md`);
+    console.log(`assembled templates/bots/${dirName}/SKILL.md`);
   }
 }
 

@@ -28,7 +28,7 @@ The pack hunts across ten categories and closes the loop on what it finds:
 | `wolfe-tech-debt` | duplication, dead code, shallow modules | existing tests pass **unchanged** (risky refactors get characterization tests first) |
 | `wolfe-arch` | undocumented decisions, violated ADRs | anchored quotes — decision sentence + offending `file:line` |
 | `wolfe-infra` | Dockerfiles, CI workflows, IaC posture | the validator reproduces the flag, then goes clean |
-| `wolfe-fixer` | **the namesake** — drains your approved-issue queue into merge-ready PRs | the repo's own verify command, fully green, tests-first |
+| `winston-wolfe` | **the namesake** — drains your approved-issue queue into merge-ready PRs | the repo's own verify command, fully green, tests-first |
 
 Bots whose surface doesn't exist in your repo no-op gracefully — a CLI tool
 gets no a11y bot unless you ask for it.
@@ -104,6 +104,24 @@ own run history; at 75% it stops fanning out, at 90% it triages what it has,
 and it always reports what it skipped. Tiered models (cheap scans → mid-tier
 specialists → top-tier gates) keep the floor low, and every run summary
 records tokens and approximate cost.
+
+## About the name
+
+In *Pulp Fiction*, when two guys have a catastrophe on their hands and no idea
+what to do, somebody makes a call and **Winston Wolfe** shows up. He doesn't
+panic, doesn't moralize, doesn't make it weird — he looks at the mess, makes a
+plan, and cleans it up. Calm, fast, exact. *The Wolf solves problems.*
+
+That's the bot the whole package is named after: `winston-wolfe` is the fixer
+— the one that takes a triaged issue and quietly turns it into a merged fix.
+The hunters find the bodies; the Wolf makes them disappear (the right way:
+with a failing test, a verified fix, and a PR a human actually merges). A
+*pack* of bots, led in spirit by the Wolf. Naturally, he stops short of
+merging — even the Wolf knows the cleanup ends when a human signs off.
+
+> And yes, he's polite about it. The pack reuses your labels, never clobbers
+> your files, and asks before it writes anything — a courteous guest who
+> cleans up after himself and lets you have the final say.
 
 ## Requirements
 

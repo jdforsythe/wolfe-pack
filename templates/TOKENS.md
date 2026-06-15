@@ -32,9 +32,9 @@ These appear in `templates/workflows/*.yml.template`.
 
 | Field | Value |
 |---|---|
-| Appears in | `wolfe-run.yml.template` (ref input default), `wolfe-hunter.yml.template` (ref default + prompt), `wolfe-fixer.yml.template` (ref field) |
+| Appears in | `wolfe-run.yml.template` (ref input default), `wolfe-hunter.yml.template` (ref default + prompt), `winston-wolfe.yml.template` (ref field) |
 | Filled by | init detects via `gh repo view --json defaultBranchRef` or `git symbolic-ref refs/remotes/origin/HEAD` |
-| Example | `main` |
+| Example | `master` |
 
 ---
 
@@ -84,7 +84,7 @@ These appear in `templates/workflows/*.yml.template`.
 
 | Field | Value |
 |---|---|
-| Appears in | `wolfe-hunter.yml.template` (cron schedule), `wolfe-fixer.yml.template` (daily safety-net cron) |
+| Appears in | `wolfe-hunter.yml.template` (cron schedule), `winston-wolfe.yml.template` (daily safety-net cron) |
 | Filled by | init computes a per-repo minute offset (0–59) from a hash of the repo name to spread load off the top-of-hour spike |
 | Example | `17` |
 

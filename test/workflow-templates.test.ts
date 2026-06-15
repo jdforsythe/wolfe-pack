@@ -82,8 +82,8 @@ describe('workflow templates', () => {
     expect(text).toContain('.claude/skills/wolfe-bugs/SKILL.md');
   });
 
-  it('wolfe-fixer: label-gated validate job feeding the fix job', () => {
-    const { text, doc } = load('wolfe-fixer.yml.template');
+  it('winston-wolfe: label-gated validate job feeding the fix job', () => {
+    const { text, doc } = load('winston-wolfe.yml.template');
     const jobs = doc.jobs as Record<string, Record<string, unknown>>;
     expect(jobs.validate, 'fixer must have a validate job').toBeTruthy();
     expect(String(jobs.validate!.if)).toContain("'wolfe:queued'");

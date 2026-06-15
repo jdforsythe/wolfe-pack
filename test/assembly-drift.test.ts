@@ -12,19 +12,22 @@ describe('kernel → templates assembly', () => {
   });
 
   it('every kernel source has a shipped bot and vice versa', () => {
+    // Bots ship at `wolfe-<name>/` except the namesake, which keeps its own dir.
     const sources = readdirSync(join(ROOT, 'kernel/bots'))
       .filter((f) => f.endsWith('.md'))
       .map((f) => f.replace(/\.md$/, ''))
       .sort();
     const shipped = readdirSync(join(ROOT, 'templates/bots'))
-      .filter((d) => d.startsWith('wolfe-'))
-      .map((d) => d.replace(/^wolfe-/, ''))
+      .filter((d) => d.startsWith('wolfe-') || d === 'winston-wolfe')
+      .map((d) => (d === 'winston-wolfe' ? d : d.replace(/^wolfe-/, '')))
       .sort();
     expect(shipped).toEqual(sources);
   });
 
   it('every shipped bot has output templates', () => {
-    const bots = readdirSync(join(ROOT, 'templates/bots')).filter((d) => d.startsWith('wolfe-'));
+    const bots = readdirSync(join(ROOT, 'templates/bots')).filter(
+      (d) => d.startsWith('wolfe-') || d === 'winston-wolfe',
+    );
     for (const bot of bots) {
       expect(
         existsSync(join(ROOT, 'templates/bots', bot, 'references/output-templates.md')),
