@@ -118,7 +118,7 @@ records tokens and approximate cost.
 orchestration the gates depend on is a Claude Code primitive. An agnostic v1
 would multiply the surface 5–10× and bet the product on abstractions over
 fast-moving runtimes. Deliberate scope, recorded in
-[DESIGN.md](https://github.com/jdforsythe/wolfe-pack/blob/main/DESIGN.md).
+[DESIGN.md](https://github.com/jdforsythe/wolfe-pack/blob/master/DESIGN.md).
 
 **What if a specialist is wrong?** Specialists *advise*; bots *gate*. A weak
 specialist degrades expertise, never safety — nothing a specialist returns
@@ -134,11 +134,11 @@ reach other repos even if something slips.
 surfaces no-op.
 
 **Where do I read the design?**
-[DESIGN.md](https://github.com/jdforsythe/wolfe-pack/blob/main/DESIGN.md) —
+[DESIGN.md](https://github.com/jdforsythe/wolfe-pack/blob/master/DESIGN.md) —
 every locked decision with its rationale and rejected alternatives.
-[docs/architecture.md](https://github.com/jdforsythe/wolfe-pack/blob/main/docs/architecture.md)
+[docs/architecture.md](https://github.com/jdforsythe/wolfe-pack/blob/master/docs/architecture.md)
 covers implementation mechanics;
-[docs/deferred.md](https://github.com/jdforsythe/wolfe-pack/blob/main/docs/deferred.md)
+[docs/deferred.md](https://github.com/jdforsythe/wolfe-pack/blob/master/docs/deferred.md)
 tracks what v1 deliberately left out. (Absolute links — the design docs live
 in the repo, not the npm tarball.)
 
